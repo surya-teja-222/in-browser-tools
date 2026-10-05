@@ -19,5 +19,19 @@ export default defineConfig({
   markdown: { syntaxHighlight: false },
   vite: {
     plugins: [tailwindcss()],
+    // Pre-bundle shared client libraries when the dev server starts. If Vite discovers one
+    // mid-session it re-bundles, and open pages fail with "504 Outdated Optimize Dep".
+    optimizeDeps: {
+      include: [
+        "react",
+        "react-dom",
+        "react-dom/client",
+        "react/jsx-runtime",
+        "@phosphor-icons/react",
+        "clsx",
+        "tailwind-merge",
+        "class-variance-authority",
+      ],
+    },
   },
 });

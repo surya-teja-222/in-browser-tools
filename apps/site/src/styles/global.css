@@ -75,6 +75,15 @@
     color: var(--color-on-sun);
   }
 
+  /* Show code exactly as typed: no "=>" to arrow ligatures. */
+  code,
+  pre,
+  kbd,
+  textarea.font-mono,
+  .font-mono {
+    font-variant-ligatures: none;
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-sun);
     outline-offset: 2px;

@@ -41,3 +41,39 @@ test("json formatter formats and reports errors", async ({ page }) => {
   await expect(page.getByText("Line 1, column 7", { exact: true })).toBeVisible();
   await expect(page.getByText("Trailing comma before }", { exact: true })).toBeVisible();
 });
+
+test("claude export viewer reads a transcript and searches it", async ({ page }) => {
+  await page.goto("/claude-export-viewer/");
+  await page.getByRole("button", { name: "Try a sample" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "The date picker test is failing can you fix it" }),
+  ).toBeVisible();
+  await expect(page.getByText("3 prompts, 2 replies, 4 tool calls.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Your prompt 1" })).toContainText(
+    "It started after I bumped the timezone library last week.",
+  );
+
+  // Tool output is collapsed until opened.
+  const bash = page.getByRole("button", { name: /Bash npm test -- DatePicker/ }).first();
+  await expect(page.getByText("FAIL  src/DatePicker.test.tsx")).toHaveCount(0);
+  await bash.click();
+  await expect(page.getByText("FAIL  src/DatePicker.test.tsx")).toBeVisible();
+
+  // Search counts matches, including ones inside collapsed tool output, and steps through them.
+  await page.getByLabel("Search this conversation").fill("datepicker");
+  await expect(page.getByText(/^1 of \d+$/)).toBeVisible();
+  await page.getByLabel("Search this conversation").press("Enter");
+  await expect(page.getByText(/^2 of \d+$/)).toBeVisible();
+  await expect(page.locator("mark[data-current]")).toHaveCount(1);
+});
+
+test("claude export viewer rejects unrelated text", async ({ page }) => {
+  await page.goto("/claude-export-viewer/");
+  await page.locator("input[type=file]").setInputFiles({
+    name: "notes.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("just some notes\nwithout any markers"),
+  });
+  await expect(page.getByRole("alert")).toContainText("doesn't look like a Claude Code export");
+});

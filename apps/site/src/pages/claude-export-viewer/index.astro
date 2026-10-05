@@ -1,0 +1,13 @@
+---
+import Tool from "@/layouts/Tool.astro";
+import App from "@/tools/claude-export-viewer/App";
+import { Content as Docs } from "@/tools/claude-export-viewer/docs.md";
+import ToolSkeleton from "@/ui/ToolSkeleton.astro";
+---
+
+<Tool slug="claude-export-viewer">
+  <App client:only="react">
+    <ToolSkeleton slot="fallback" />
+  </App>
+  <Docs slot="docs" />
+</Tool>

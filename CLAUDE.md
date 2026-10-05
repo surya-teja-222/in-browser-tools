@@ -42,3 +42,9 @@ structure. The rest of this file lists things that are easy to get wrong.
 - `astro preview` detaches into the background when run by an AI agent. Pass `--ignore-lock` to
   keep it in the foreground (the Playwright config already does), and stop strays with
   `pnpm --filter site exec astro preview stop`.
+- Playwright serves its own build on port 4329 and never reuses a server, so it can't
+  accidentally test a running `pnpm dev` on 4321.
+- If the dev server shows "504 Outdated Optimize Dep", restart it. To avoid it, add client
+  libraries every tool uses to `vite.optimizeDeps.include` in `astro.config.ts`.
+- Never commit real user exports or transcripts as fixtures (the repo is public). Write
+  synthetic samples, like `claude-export-viewer/sample.ts`.
