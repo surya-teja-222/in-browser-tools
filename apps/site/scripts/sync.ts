@@ -28,6 +28,11 @@ for (const { path, content } of outputs) {
   if (current === content) continue;
   if (check) {
     console.error(`${path} is out of date. Run "pnpm sync" and commit the result.`);
+    let i = 0;
+    while (i < current.length && i < content.length && current[i] === content[i]) i++;
+    console.error(`First diff at byte ${i}.`);
+    console.error(`on disk : ${JSON.stringify(current.slice(Math.max(0, i - 20), i + 40))}`);
+    console.error(`expected: ${JSON.stringify(content.slice(Math.max(0, i - 20), i + 40))}`);
     stale = true;
   } else {
     writeFileSync(path, content);
