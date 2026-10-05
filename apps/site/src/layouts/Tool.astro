@@ -1,0 +1,47 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getTool } from "@/tools/registry";
+import SiteFooter from "@/ui/SiteFooter.astro";
+import SiteHeader from "@/ui/SiteHeader.astro";
+import ToolIcon from "@/ui/ToolIcon.astro";
+
+interface Props {
+  slug: string;
+}
+
+const tool = getTool(Astro.props.slug);
+const hasDocs = Astro.slots.has("docs");
+---
+
+<Base
+  title={`${tool.name} | tools.itssurya.com`}
+  description={tool.description}
+  network={tool.network}
+>
+  <SiteHeader current={tool.name} />
+  <main class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="flex flex-col gap-4 pt-6 pb-8 sm:flex-row sm:items-end sm:justify-between sm:pt-10">
+      <div>
+        <h1 class="font-display text-[2.25rem] leading-[1.05] font-semibold tracking-tight sm:text-[2.75rem]">
+          {tool.name}
+        </h1>
+        <p class="mt-2 max-w-[60ch] text-ink-muted">{tool.description}</p>
+      </div>
+      {tool.network === "none" && (
+        <p class="flex shrink-0 items-center gap-2 text-sm text-ink-muted">
+          <ToolIcon name="wifi-slash" size={18} />
+          This page is blocked from making network requests.
+        </p>
+      )}
+    </div>
+
+    <slot />
+
+    {hasDocs && (
+      <section class="prose-tool mt-16" aria-label={`About ${tool.name}`}>
+        <slot name="docs" />
+      </section>
+    )}
+  </main>
+  <SiteFooter />
+</Base>

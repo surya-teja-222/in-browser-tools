@@ -1,0 +1,119 @@
+---
+import Base from "@/layouts/Base.astro";
+import { tools } from "@/tools/registry";
+import SiteFooter from "@/ui/SiteFooter.astro";
+import SiteHeader from "@/ui/SiteHeader.astro";
+import ToolIcon from "@/ui/ToolIcon.astro";
+---
+
+<Base
+  title="tools.itssurya.com"
+  description="Small tools that run in your browser. Files you open stay on your device."
+>
+  <SiteHeader />
+  <main class="mx-auto max-w-6xl px-5 sm:px-8">
+    <section class="pt-12 pb-10 sm:pt-20">
+      <h1 class="max-w-[16ch] font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.03em] sm:text-[4rem]">
+        Small tools that run in your browser.
+      </h1>
+      <p class="mt-5 max-w-[46ch] text-lg text-ink-muted">
+        Files you open here stay on your device. Nothing is uploaded.
+      </p>
+    </section>
+
+    <div class="relative">
+      <label for="tool-filter" class="sr-only">
+        Search tools
+      </label>
+      <input
+        id="tool-filter"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Search tools"
+        class="w-full border-b-2 border-ink bg-transparent pt-2 pb-3 pr-12 font-display text-[1.75rem] tracking-tight placeholder:text-ink-muted focus:border-sun focus:outline-none sm:text-[2.25rem]"
+      />
+      <kbd
+        class="pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 rounded-control border border-rule border-b-2 px-2 py-0.5 text-sm text-ink-muted"
+        aria-hidden="true"
+      >
+        /
+      </kbd>
+    </div>
+
+    <ul id="tool-list" class="mt-2" aria-label="Tools">
+      {tools.map((tool) => {
+        const planned = tool.status === "planned";
+        const Row = planned ? "div" : "a";
+        return (
+          <li
+            data-tool
+            data-search={[tool.name, tool.description, ...tool.tags].join(" ").toLowerCase()}
+          >
+            <Row
+              href={planned ? undefined : `/${tool.slug}/`}
+              class:list={[
+                "group grid grid-cols-[auto_1fr] items-baseline gap-x-4 gap-y-1 border-b border-rule py-5 focus-visible:outline-offset-4 sm:grid-cols-[auto_minmax(12rem,18rem)_1fr_auto] sm:gap-x-6",
+                planned && "opacity-60",
+              ]}
+            >
+              <ToolIcon name={tool.icon} size={24} class="translate-y-1 text-ink-muted" />
+              <span class="font-display text-[1.375rem] font-semibold tracking-tight">
+                <span class="mark">{tool.name}</span>
+              </span>
+              <span class="col-start-2 text-ink-muted sm:col-start-auto">{tool.description}</span>
+              <span class="col-start-2 text-sm text-ink-muted sm:col-start-auto">
+                {planned ? "Coming soon" : tool.status === "beta" ? "Beta" : ""}
+              </span>
+            </Row>
+          </li>
+        );
+      })}
+    </ul>
+    <p id="tool-empty" class="hidden py-10 text-ink-muted">
+      No tool matches that. Try a format name like json or csv.
+    </p>
+  </main>
+  <SiteFooter />
+</Base>
+
+<script>
+  // Filter the list as you type. "/" focuses the search, Enter opens the first match.
+  const input = document.querySelector<HTMLInputElement>("#tool-filter")!;
+  const rows = [...document.querySelectorAll<HTMLLIElement>("[data-tool]")];
+  const empty = document.querySelector<HTMLElement>("#tool-empty")!;
+
+  function visibleLinks() {
+    return rows.filter((r) => !r.hidden).flatMap((r) => [...r.querySelectorAll("a")]);
+  }
+
+  function apply() {
+    const terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    for (const row of rows) {
+      row.hidden = !terms.every((t) => row.dataset.search!.includes(t));
+    }
+    const first = visibleLinks()[0];
+    for (const a of document.querySelectorAll("#tool-list a")) {
+      a.toggleAttribute("data-active", terms.length > 0 && a === first);
+    }
+    empty.classList.toggle(
+      "hidden",
+      rows.some((r) => !r.hidden),
+    );
+  }
+
+  input.addEventListener("input", apply);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") visibleLinks()[0]?.click();
+    if (e.key === "Escape") {
+      input.value = "";
+      apply();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== input) {
+      e.preventDefault();
+      input.focus();
+    }
+  });
+</script>

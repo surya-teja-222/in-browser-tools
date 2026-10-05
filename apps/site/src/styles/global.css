@@ -1,0 +1,158 @@
+@import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/atkinson-hyperlegible-next";
+@import "@fontsource-variable/jetbrains-mono";
+
+/*
+ * Design tokens. Semantic names only; components never use raw hex values.
+ *
+ * Accent: "sun" is the only accent colour on the site. Use it for the highlighter mark,
+ * focus rings and the primary action. Text on sun is always --c-on-sun.
+ *
+ * Radius rule: controls (buttons, inputs, selects) are rounded-control (8px),
+ * panels (editors, dropzones) are rounded-panel (12px). Nothing else is rounded.
+ */
+:root {
+  color-scheme: light dark;
+
+  --c-paper: #f4f6f8;
+  --c-surface: #fbfcfd;
+  --c-ink: #15213b;
+  --c-ink-muted: #4b5772;
+  --c-rule: #d8dee7;
+  --c-sun: #e9b23a;
+  --c-on-sun: #15213b;
+  --c-danger: #b42318;
+  --c-danger-wash: #fdecea;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-paper: #0e1526;
+    --c-surface: #151e33;
+    --c-ink: #e6eaf2;
+    --c-ink-muted: #a3adc2;
+    --c-rule: #27324a;
+    --c-sun: #edbb4c;
+    --c-on-sun: #15213b;
+    --c-danger: #f97066;
+    --c-danger-wash: #3a1d22;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--c-paper);
+  --color-surface: var(--c-surface);
+  --color-ink: var(--c-ink);
+  --color-ink-muted: var(--c-ink-muted);
+  --color-rule: var(--c-rule);
+  --color-sun: var(--c-sun);
+  --color-on-sun: var(--c-on-sun);
+  --color-danger: var(--c-danger);
+  --color-danger-wash: var(--c-danger-wash);
+
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Atkinson Hyperlegible Next Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-sun);
+    color: var(--color-on-sun);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-sun);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must override component transitions */
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      /* biome-ignore-end lint/complexity/noImportantStyles: reduced motion must override component transitions */
+    }
+  }
+}
+
+@layer components {
+  /* Highlighter mark behind a tool name. Drawn left to right when its row is hovered or focused. */
+  .mark {
+    position: relative;
+    isolation: isolate;
+  }
+  .mark::before {
+    content: "";
+    position: absolute;
+    inset: 0.12em -0.2em 0.02em;
+    z-index: -1;
+    border-radius: 0.15em 0.3em 0.2em 0.35em;
+    background: var(--color-sun);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 320ms var(--ease-out-quart);
+  }
+  .group:hover .mark::before,
+  .group:focus-visible .mark::before,
+  .group[data-active] .mark::before {
+    transform: scaleX(1);
+  }
+  .group:hover .mark,
+  .group:focus-visible .mark,
+  .group[data-active] .mark {
+    color: var(--color-on-sun);
+  }
+
+  /* Rendered markdown (tool docs). */
+  .prose-tool {
+    max-width: 68ch;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
+  }
+  .prose-tool h2 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin: 2rem 0 0.5rem;
+  }
+  .prose-tool p,
+  .prose-tool ul {
+    margin: 0.75rem 0;
+  }
+  .prose-tool ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  .prose-tool code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    color: var(--color-ink);
+  }
+  .prose-tool kbd {
+    font-family: var(--font-sans);
+    font-size: 0.8em;
+    border: 1px solid var(--color-rule);
+    border-bottom-width: 2px;
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.35rem;
+    color: var(--color-ink);
+  }
+}

@@ -1,0 +1,17 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Shared versions. Reference with "catalog:" in any package.json so every
+# app and package stays on the same React / TypeScript / test stack.
+catalog:
+  react: ^19.3.0
+  react-dom: ^19.3.0
+  "@types/react": ^19.3.0
+  "@types/react-dom": ^19.3.0
+  typescript: ~6.0.3
+  vitest: ^5.0.3
+
+# Packages allowed to run install scripts. Everything else is blocked by default.
+allowBuilds:
+  esbuild: true

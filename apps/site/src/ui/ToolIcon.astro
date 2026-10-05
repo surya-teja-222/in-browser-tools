@@ -1,0 +1,19 @@
+---
+// Server-rendered Phosphor icon by kebab-case name. Ships static SVG, no client JS.
+import * as Icons from "@phosphor-icons/react/dist/ssr";
+import type { ComponentType } from "react";
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 24, class: className } = Astro.props;
+const pascal = name.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
+const Icon = (Icons as unknown as Record<string, ComponentType<Record<string, unknown>>>)[pascal];
+if (!Icon)
+  throw new Error(`Unknown Phosphor icon "${name}". Browse names at https://phosphoricons.com`);
+---
+
+<Icon size={size} weight="regular" className={className} aria-hidden="true" />

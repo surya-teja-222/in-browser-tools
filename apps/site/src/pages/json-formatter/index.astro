@@ -1,0 +1,13 @@
+---
+import Tool from "@/layouts/Tool.astro";
+import App from "@/tools/json-formatter/App";
+import { Content as Docs } from "@/tools/json-formatter/docs.md";
+import ToolSkeleton from "@/ui/ToolSkeleton.astro";
+---
+
+<Tool slug="json-formatter">
+  <App client:only="react">
+    <ToolSkeleton slot="fallback" />
+  </App>
+  <Docs slot="docs" />
+</Tool>

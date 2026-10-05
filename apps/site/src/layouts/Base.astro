@@ -1,0 +1,53 @@
+---
+import "@/styles/global.css";
+import type { ToolMeta } from "@/tools/types";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Becomes CSP connect-src. Defaults to same-origin only. */
+  network?: ToolMeta["network"];
+}
+
+const { title, description, network = "self" } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// Content-Security-Policy, written by Astro as a <meta> tag together with hashes for its own
+// inline scripts and styles. Being a <meta> tag, it works on any static host.
+const connect =
+  network === "none" ? "'none'" : network === "self" ? "'self'" : ["'self'", ...network].join(" ");
+for (const directive of [
+  "default-src 'self'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "worker-src 'self' blob:",
+  `connect-src ${connect}`,
+  "object-src 'none'",
+  "base-uri 'none'",
+  "form-action 'none'",
+] as const) {
+  Astro.csp?.insertDirective(directive);
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#f4f6f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1526" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body class="min-h-dvh">
+    <slot />
+  </body>
+</html>

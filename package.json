@@ -1,0 +1,26 @@
+{
+  "name": "in-browser-tools",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter site dev",
+    "build": "pnpm --filter site build",
+    "preview": "pnpm --filter site preview",
+    "new-tool": "pnpm --filter site new-tool",
+    "sync": "pnpm --filter site sync",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter site test:e2e",
+    "lint": "biome check . && prettier --check \"apps/**/*.astro\"",
+    "format": "biome check --write . && prettier --write \"apps/**/*.astro\""
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.1.0"
+  }
+}
