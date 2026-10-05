@@ -19,20 +19,25 @@ const outputs = [
   },
 ];
 
+// `vercel build` re-serializes vercel.json (minified) before running the build command, so
+// --check compares parsed JSON rather than raw bytes to avoid tripping on formatting alone.
+function sameJson(a: string, b: string) {
+  try {
+    return JSON.stringify(JSON.parse(a)) === JSON.stringify(JSON.parse(b));
+  } catch {
+    return false;
+  }
+}
+
 let stale = false;
 for (const { path, content } of outputs) {
   let current = "";
   try {
     current = readFileSync(path, "utf8");
   } catch {}
-  if (current === content) continue;
+  if (check ? sameJson(current, content) : current === content) continue;
   if (check) {
     console.error(`${path} is out of date. Run "pnpm sync" and commit the result.`);
-    let i = 0;
-    while (i < current.length && i < content.length && current[i] === content[i]) i++;
-    console.error(`First diff at byte ${i}.`);
-    console.error(`on disk : ${JSON.stringify(current.slice(Math.max(0, i - 20), i + 40))}`);
-    console.error(`expected: ${JSON.stringify(content.slice(Math.max(0, i - 20), i + 40))}`);
     stale = true;
   } else {
     writeFileSync(path, content);
