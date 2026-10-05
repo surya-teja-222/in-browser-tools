@@ -101,6 +101,14 @@
   }
 }
 
+/* Focus mode: a tool hides the page chrome around it (see layouts/Tool.astro). */
+html[data-focus] [data-chrome] {
+  display: none;
+}
+html[data-focus] main {
+  max-width: none;
+}
+
 @layer components {
   /* Highlighter mark behind a tool name. Drawn left to right when its row is hovered or focused. */
   .mark {

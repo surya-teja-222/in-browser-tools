@@ -49,7 +49,10 @@ test("claude export viewer reads a transcript and searches it", async ({ page })
   await expect(
     page.getByRole("heading", { name: "The date picker test is failing can you fix it" }),
   ).toBeVisible();
-  await expect(page.getByText("3 prompts, 2 replies, 4 tool calls.")).toBeVisible();
+  await expect(page.getByText(/3 prompts, 2 replies, 4 tool calls\./)).toBeVisible();
+  // Focus mode: the tool's own heading and docs make way for the conversation.
+  await expect(page.getByRole("heading", { level: 1 })).toBeHidden();
+  await expect(page.getByRole("region", { name: "About Claude export viewer" })).toBeHidden();
   await expect(page.getByRole("region", { name: "Your prompt 1" })).toContainText(
     "It started after I bumped the timezone library last week.",
   );
@@ -66,6 +69,10 @@ test("claude export viewer reads a transcript and searches it", async ({ page })
   await page.getByLabel("Search this conversation").press("Enter");
   await expect(page.getByText(/^2 of \d+$/)).toBeVisible();
   await expect(page.locator("mark[data-current]")).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Close conversation" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Claude export viewer" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Try a sample" })).toBeVisible();
 });
 
 test("claude export viewer rejects unrelated text", async ({ page }) => {

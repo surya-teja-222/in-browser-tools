@@ -37,7 +37,7 @@ export const TurnView = memo(function TurnView({
         id={`turn-${index}`}
         data-prompt={promptNumber}
         aria-label={`Command ${plainText(turn.blocks)}`}
-        className="scroll-mt-6 px-5 py-2"
+        className="scroll-mt-6 px-1 py-2 sm:px-5"
       >
         <p className="flex items-center gap-2 text-sm text-ink-muted">
           <span className="size-2 rounded-full bg-sun" aria-hidden="true" />
@@ -56,7 +56,7 @@ export const TurnView = memo(function TurnView({
         id={`turn-${index}`}
         data-prompt={promptNumber}
         aria-label={`Your prompt ${promptNumber}`}
-        className="scroll-mt-6 rounded-panel border border-rule bg-surface px-5 py-4 [contain-intrinsic-size:auto_8rem] [content-visibility:auto]"
+        className="scroll-mt-6 rounded-panel border border-rule bg-surface px-4 py-4 sm:px-5 [contain-intrinsic-size:auto_8rem] [content-visibility:auto]"
       >
         <p className="mb-2 flex items-center gap-2 text-sm font-medium">
           <span className="size-2 rounded-full bg-sun" aria-hidden="true" />
@@ -71,7 +71,7 @@ export const TurnView = memo(function TurnView({
     <section
       id={`turn-${index}`}
       aria-label="Claude"
-      className="scroll-mt-6 px-5 py-4 [contain-intrinsic-size:auto_12rem] [content-visibility:auto]"
+      className="scroll-mt-6 px-1 py-4 sm:px-5 [contain-intrinsic-size:auto_12rem] [content-visibility:auto]"
     >
       <p className="mb-2 text-sm font-medium text-ink-muted">Claude</p>
       <div className="flex flex-col gap-3">
@@ -146,7 +146,7 @@ function ItemView({ item, query, expandAll }: { item: Item; query: string; expan
 
 function Blocks({ blocks, query }: { blocks: Block[]; query: string }) {
   return (
-    <div className="flex max-w-[72ch] flex-col gap-3 leading-relaxed">
+    <div className="flex max-w-[78ch] flex-col gap-3 leading-relaxed">
       {blocks.map((block, i) => {
         // biome-ignore-start lint/suspicious/noArrayIndexKey: blocks never reorder
         if (block.kind === "rule") return <hr key={i} className="border-rule" />;

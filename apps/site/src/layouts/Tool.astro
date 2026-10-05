@@ -10,6 +10,8 @@ interface Props {
 }
 
 const tool = getTool(Astro.props.slug);
+// Elements marked data-chrome (title, docs, footer) hide while <html data-focus> is set. A tool
+// sets it with useFocusMode() when its content should take over the page.
 const hasDocs = Astro.slots.has("docs");
 ---
 
@@ -20,7 +22,10 @@ const hasDocs = Astro.slots.has("docs");
 >
   <SiteHeader current={tool.name} />
   <main class="mx-auto max-w-6xl px-5 sm:px-8">
-    <div class="flex flex-col gap-4 pt-6 pb-8 sm:flex-row sm:items-end sm:justify-between sm:pt-10">
+    <div
+      data-chrome
+      class="flex flex-col gap-4 pt-6 pb-8 sm:flex-row sm:items-end sm:justify-between sm:pt-10"
+    >
       <div>
         <h1 class="font-display text-[2.25rem] leading-[1.05] font-semibold tracking-tight sm:text-[2.75rem]">
           {tool.name}
@@ -38,10 +43,12 @@ const hasDocs = Astro.slots.has("docs");
     <slot />
 
     {hasDocs && (
-      <section class="prose-tool mt-16" aria-label={`About ${tool.name}`}>
+      <section data-chrome class="prose-tool mt-16" aria-label={`About ${tool.name}`}>
         <slot name="docs" />
       </section>
     )}
   </main>
-  <SiteFooter />
+  <div data-chrome>
+    <SiteFooter />
+  </div>
 </Base>
