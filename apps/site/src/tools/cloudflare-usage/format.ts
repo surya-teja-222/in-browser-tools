@@ -39,6 +39,13 @@ export function percent(metric: MetricResult): number | null {
   return (metric.used / metric.limit) * 100;
 }
 
+/** "0%", "<1%", "62%", "105%". Rounded, with a floor so small use is not shown as nothing. */
+export function formatPercent(pct: number): string {
+  if (pct <= 0) return "0%";
+  if (pct < 1) return "<1%";
+  return `${Math.round(pct)}%`;
+}
+
 export function periodLabel(period: Period): string {
   switch (period) {
     case "day":
