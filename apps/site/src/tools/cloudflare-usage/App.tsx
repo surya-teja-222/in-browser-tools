@@ -1,7 +1,6 @@
 import {
   ArrowClockwiseIcon,
   ArrowSquareOutIcon,
-  CircleNotchIcon,
   ShieldCheckIcon,
   WarningCircleIcon,
   XIcon,
@@ -17,6 +16,7 @@ import {
   periodLabel,
   untilUtcMidnight,
 } from "./format";
+import { FREE_PLAN } from "./limits";
 import { SAMPLE_REPORT } from "./sample";
 import type {
   AccountSummary,
@@ -127,16 +127,47 @@ export default function App() {
   }
 
   return (
-    <TokenForm
-      token={token}
-      accountId={accountId}
-      busy={busy}
-      error={error}
-      onToken={setToken}
-      onAccountId={setAccountId}
-      onSubmit={() => check()}
-      onSample={() => setView({ kind: "report", report: SAMPLE_REPORT, sample: true })}
-    />
+    <div className="flex flex-col gap-8">
+      <TokenForm
+        token={token}
+        accountId={accountId}
+        busy={busy}
+        error={error}
+        onToken={setToken}
+        onAccountId={setAccountId}
+        onSubmit={() => check()}
+        onSample={() => setView({ kind: "report", report: SAMPLE_REPORT, sample: true })}
+      />
+      {busy && <LedgerSkeleton />}
+    </div>
+  );
+}
+
+/** Placeholder in the shape of the report, shown while Cloudflare is being asked. */
+function LedgerSkeleton() {
+  return (
+    <div className="animate-pulse" aria-hidden="true">
+      <div className="h-6 w-56 rounded-control bg-rule/60" />
+      <div className="mt-3 h-4 w-80 max-w-full rounded-control bg-rule/60" />
+      <div className="mt-8 gap-x-10 md:columns-2">
+        {FREE_PLAN.map((p) => (
+          <section key={p.id} className="mb-8 break-inside-avoid border-t border-rule pt-3">
+            <div className="h-5 w-32 rounded-control bg-rule/60" />
+            <ul className="mt-4 flex flex-col gap-3.5">
+              {p.metrics.map((m) => (
+                <li key={m.id} className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <div className="h-4 w-36 rounded-control bg-rule/60" />
+                    <div className="h-4 w-28 rounded-control bg-rule/60" />
+                  </div>
+                  <div className="h-1 w-full bg-rule/40" />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -186,7 +217,7 @@ function TokenForm(props: {
               value={props.token}
               onChange={(e) => props.onToken(e.target.value)}
               placeholder="Paste the token Cloudflare shows once"
-              className="h-10 rounded-control border border-rule bg-paper px-3 font-mono text-sm placeholder:font-sans placeholder:text-ink-muted/70"
+              className="h-9 rounded-control border border-rule bg-paper px-3 font-mono text-sm placeholder:font-sans placeholder:text-ink-muted"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -204,14 +235,14 @@ function TokenForm(props: {
               value={props.accountId}
               onChange={(e) => props.onAccountId(e.target.value)}
               placeholder="Only if the token cannot list accounts"
-              className="h-10 rounded-control border border-rule bg-paper px-3 font-mono text-sm placeholder:font-sans placeholder:text-ink-muted/70"
+              className="h-9 rounded-control border border-rule bg-paper px-3 font-mono text-sm placeholder:font-sans placeholder:text-ink-muted"
             />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Button type="submit" variant="primary" disabled={props.busy || !props.token.trim()}>
-            {props.busy ? <CircleNotchIcon className="animate-spin" /> : <ShieldCheckIcon />}
+            <ShieldCheckIcon />
             {props.busy ? "Checking" : "Check usage"}
           </Button>
           <Button onClick={() => window.open(CREATE_TOKEN_URL, "_blank", "noopener,noreferrer")}>
