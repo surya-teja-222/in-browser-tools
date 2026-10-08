@@ -1,0 +1,13 @@
+---
+import Tool from "@/layouts/Tool.astro";
+import App from "@/tools/cloudflare-usage/App";
+import { Content as Docs } from "@/tools/cloudflare-usage/docs.md";
+import ToolSkeleton from "@/ui/ToolSkeleton.astro";
+---
+
+<Tool slug="cloudflare-usage">
+  <App client:only="react">
+    <ToolSkeleton slot="fallback" />
+  </App>
+  <Docs slot="docs" />
+</Tool>

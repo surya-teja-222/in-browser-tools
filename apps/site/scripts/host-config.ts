@@ -50,8 +50,9 @@ export function vercelConfig(rules: HeaderRule[]) {
     $schema: "https://openapi.vercel.sh/vercel.json",
     framework: null,
     installCommand: "pnpm install --frozen-lockfile",
-    buildCommand: "pnpm build",
-    outputDirectory: "apps/site/dist",
+    // Builds with the Vercel adapter (VERCEL=1 is set by Vercel) and moves its Build Output API
+    // folder to <repo>/.vercel/output, which Vercel picks up without an outputDirectory.
+    buildCommand: "pnpm build:vercel",
     trailingSlash: true,
     headers: rules.map((rule) => ({
       source: `${rule.prefix}(.*)`,

@@ -84,3 +84,50 @@ test("claude export viewer rejects unrelated text", async ({ page }) => {
   });
   await expect(page.getByRole("alert")).toContainText("doesn't look like a Claude Code export");
 });
+
+test("api health route runs on the server", async ({ request }) => {
+  const res = await request.get("/api/health/");
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toContain("application/json");
+  expect(await res.json()).toMatchObject({ ok: true });
+});
+
+test("cloudflare usage shows the sample report and forgets nothing", async ({ page }) => {
+  await page.goto("/cloudflare-usage/");
+  await expect(page.getByLabel("API token")).toBeVisible();
+  await page.getByRole("button", { name: "Try a sample" }).click();
+
+  await expect(page.getByRole("heading", { name: "Sample account" })).toBeVisible();
+  await expect(page.getByText("Sample data.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Workers KV" })).toBeVisible();
+  // One metric is over its limit and one dataset failed in the sample.
+  await expect(page.getByText("Over a limit")).toBeVisible();
+  await expect(page.getByText("Not available")).toBeVisible();
+
+  await page.getByRole("button", { name: "Start over" }).click();
+  await expect(page.getByLabel("API token")).toHaveValue("");
+});
+
+test("cloudflare usage api rejects calls without a token", async ({ request }) => {
+  const res = await request.post("/api/cloudflare-usage/", { data: {} });
+  expect(res.status()).toBe(400);
+  expect(await res.json()).toMatchObject({ kind: "error" });
+});
+
+test("cloudflare usage api accepts its own host as origin and refuses others", async ({
+  request,
+  baseURL,
+}) => {
+  const own = await request.post("/api/cloudflare-usage/", {
+    data: {},
+    headers: { Origin: baseURL as string },
+  });
+  // Same origin gets past the origin check and fails on the missing token instead.
+  expect(own.status()).toBe(400);
+
+  const other = await request.post("/api/cloudflare-usage/", {
+    data: {},
+    headers: { Origin: "https://evil.example" },
+  });
+  expect(other.status()).toBe(403);
+});

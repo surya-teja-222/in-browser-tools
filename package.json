@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "pnpm --filter site dev",
     "build": "pnpm --filter site build",
+    "build:vercel": "pnpm build && pnpm --filter site exec node scripts/vercel-output.ts",
     "preview": "pnpm --filter site preview",
     "new-tool": "pnpm --filter site new-tool",
     "sync": "pnpm --filter site sync",
