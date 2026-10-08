@@ -113,3 +113,21 @@ test("cloudflare usage api rejects calls without a token", async ({ request }) =
   expect(res.status()).toBe(400);
   expect(await res.json()).toMatchObject({ kind: "error" });
 });
+
+test("cloudflare usage api accepts its own host as origin and refuses others", async ({
+  request,
+  baseURL,
+}) => {
+  const own = await request.post("/api/cloudflare-usage/", {
+    data: {},
+    headers: { Origin: baseURL as string },
+  });
+  // Same origin gets past the origin check and fails on the missing token instead.
+  expect(own.status()).toBe(400);
+
+  const other = await request.post("/api/cloudflare-usage/", {
+    data: {},
+    headers: { Origin: "https://evil.example" },
+  });
+  expect(other.status()).toBe(403);
+});

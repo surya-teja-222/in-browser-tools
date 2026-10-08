@@ -10,10 +10,7 @@ export const prerender = false;
  * on this site may call it; the Origin check stops the route being used as a general proxy.
  */
 export const POST: APIRoute = async ({ request, site }) => {
-  const origin = request.headers.get("origin");
-  if (origin && site && origin !== site.origin && !import.meta.env.DEV) {
-    return respond({ kind: "error", error: "Forbidden." }, 403);
-  }
+  if (!sameSite(request, site)) return respond({ kind: "error", error: "Forbidden." }, 403);
 
   const auth = request.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice("Bearer ".length).trim() : "";
@@ -58,6 +55,23 @@ export const POST: APIRoute = async ({ request, site }) => {
 
 export const GET: APIRoute = () =>
   respond({ kind: "error", error: "Send a POST with an Authorization header." }, 405);
+
+/**
+ * True when the call comes from a page on this deployment. The canonical site origin counts, and
+ * so does whatever host the request arrived on, so preview deployments on other hostnames work.
+ * Requests without an Origin header (curl, tests) are allowed; there is no cookie to protect.
+ */
+function sameSite(request: Request, site: URL | undefined): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin || import.meta.env.DEV) return true;
+  if (site && origin === site.origin) return true;
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  try {
+    return !!host && new URL(origin).host === host.split(",")[0]?.trim();
+  } catch {
+    return false;
+  }
+}
 
 function respond(body: UsageResponse, status: number) {
   return Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
