@@ -91,3 +91,25 @@ test("api health route runs on the server", async ({ request }) => {
   expect(res.headers()["content-type"]).toContain("application/json");
   expect(await res.json()).toMatchObject({ ok: true });
 });
+
+test("cloudflare usage shows the sample report and forgets nothing", async ({ page }) => {
+  await page.goto("/cloudflare-usage/");
+  await expect(page.getByLabel("API token")).toBeVisible();
+  await page.getByRole("button", { name: "Try a sample" }).click();
+
+  await expect(page.getByRole("heading", { name: "Sample account" })).toBeVisible();
+  await expect(page.getByText("Sample data.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Workers KV" })).toBeVisible();
+  // One metric is over its limit and one dataset failed in the sample.
+  await expect(page.getByText("Over a limit")).toBeVisible();
+  await expect(page.getByText("Not available")).toBeVisible();
+
+  await page.getByRole("button", { name: "Start over" }).click();
+  await expect(page.getByLabel("API token")).toHaveValue("");
+});
+
+test("cloudflare usage api rejects calls without a token", async ({ request }) => {
+  const res = await request.post("/api/cloudflare-usage/", { data: {} });
+  expect(res.status()).toBe(400);
+  expect(await res.json()).toMatchObject({ kind: "error" });
+});
