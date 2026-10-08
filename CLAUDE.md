@@ -14,7 +14,12 @@ structure. The rest of this file lists things that are easy to get wrong.
   client React; icons there use `src/ui/ToolIcon.astro` (server-rendered Phosphor).
 - After changing `crossOriginIsolated` or any header logic, run `pnpm sync` and commit
   `vercel.json`. The build and a unit test fail if it is stale.
-- Keep everything host-neutral: no Vercel adapter, Vercel SDKs or Vercel-only services.
+- Keep everything host-neutral. Server routes live in `src/pages/api/`, export `prerender = false`
+  and use only web-standard Request/Response: no Vercel SDKs, Vercel-only services or Node-only
+  APIs. The adapter line in `astro.config.ts` is the one host-specific thing: Node locally and in
+  tests, Vercel when `VERCEL` is set. `astro preview` only works with the Node build.
+- Tools that use an API route set `network: "self"` and must say so in their UI. The site's
+  promise is "nothing leaves your browser", so server use is the exception, never the default.
 
 ## CSP gotchas
 

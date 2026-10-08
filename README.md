@@ -14,7 +14,7 @@ pnpm dev            # http://localhost:4321
 | Command | What it does |
 |---|---|
 | `pnpm new-tool <slug> "Name"` | Scaffold a new tool |
-| `pnpm build` | Production build into `apps/site/dist` |
+| `pnpm build` | Production build into `apps/site/dist` (`client/` static files, `server/` for API routes) |
 | `pnpm preview` | Serve the production build |
 | `pnpm lint` / `pnpm format` | Biome for TS/CSS/JSON, Prettier for `.astro` |
 | `pnpm typecheck` | `astro check` |
@@ -57,6 +57,11 @@ Rules:
 
 - **Astro 7** builds one static HTML page per tool. Each tool's React UI is an island
   (`client:only="react"`), so its code loads only on that page.
+- **API routes.** Files in `src/pages/api/` that export `prerender = false` run on the server, for
+  the few tools that need one (for example to call a third-party API that blocks browsers). They
+  use only web-standard Request/Response. Locally the Node adapter serves them in `astro preview`
+  and the Playwright run; on Vercel they become one serverless function. `/api/health/` is the
+  template.
 - **Security headers.** The Content-Security-Policy is a `<meta>` tag written by Astro per page
   (see `src/layouts/Base.astro`), so it works on any host. Headers that cannot be a `<meta>` tag
   (frame blocking, COOP/COEP, caching) are generated from the registry into `vercel.json` by
@@ -69,9 +74,13 @@ Rules:
 
 Vercel (Hobby), connected to this repo. Production deploys from `main`, and every PR gets a
 preview URL. Project settings come from `vercel.json`; leave the Vercel root directory at the repo
-root. DNS: a `CNAME` record `tools` pointing to `cname.vercel-dns.com`, set to DNS only (not
+root. Vercel sets `VERCEL=1`, which switches `astro.config.ts` to the Vercel adapter, and
+`pnpm build:vercel` then moves the adapter's Build Output folder from `apps/site/.vercel/output`
+to the repo root, where Vercel looks for it. To reproduce the Vercel build locally run
+`VERCEL=1 pnpm build:vercel`. DNS: a `CNAME` record `tools` pointing to `cname.vercel-dns.com`, set to DNS only (not
 proxied) in Cloudflare.
 
-Moving to Cloudflare Workers later: add a `_headers` writer next to `vercelConfig` in
-`scripts/host-config.ts`, add a `wrangler.jsonc` that serves `apps/site/dist`, and change the DNS
-record. Nothing in the tools themselves depends on the host.
+Moving to Cloudflare Workers later: swap the Vercel adapter for `@astrojs/cloudflare` in
+`astro.config.ts`, add a `_headers` writer next to `vercelConfig` in `scripts/host-config.ts`, add
+a `wrangler.jsonc`, and change the DNS record. Nothing in the tools or API routes depends on the
+host.

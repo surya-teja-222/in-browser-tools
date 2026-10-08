@@ -84,3 +84,10 @@ test("claude export viewer rejects unrelated text", async ({ page }) => {
   });
   await expect(page.getByRole("alert")).toContainText("doesn't look like a Claude Code export");
 });
+
+test("api health route runs on the server", async ({ request }) => {
+  const res = await request.get("/api/health/");
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toContain("application/json");
+  expect(await res.json()).toMatchObject({ ok: true });
+});
